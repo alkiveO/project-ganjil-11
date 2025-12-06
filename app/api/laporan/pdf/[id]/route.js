@@ -1,5 +1,4 @@
-// app/api/laporan/pdf/[id]/route.js
-
+// app/api/laporan/pdf/[id]/route.js — VERSI FINAL + GURU NAME
 import { query } from "@/lib/db";
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { NextResponse } from 'next/server';
@@ -32,7 +31,6 @@ export async function GET(request, { params: paramsPromise }) {
   }
 
   try {
-    // JOIN DENGAN users DAN siswa_profiles
     const results = await query(`
       SELECT 
         l.id,
@@ -42,12 +40,14 @@ export async function GET(request, { params: paramsPromise }) {
         u.name AS siswa_name,
         sp.nis,
         sp.kelas,
-        p.topik
+        p.topik,
+        g.name AS guru_name     -- 🔥 TAMBAH GURU NAME
       FROM laporan_konseling l
       JOIN pengajuan_konseling p ON l.pengajuan_id = p.id
-      JOIN users u ON l.siswa_id = u.id
+      JOIN users u ON p.siswa_id = u.id
       LEFT JOIN siswa_profiles sp ON u.id = sp.user_id
-      WHERE l.id = ?
+      LEFT JOIN users g ON p.guru_id = g.id   -- 🔥 JOIN GURU BK
+      WHERE l.pengajuan_id = ?
     `, [id]);
 
     const laporan = results[0];
@@ -56,89 +56,103 @@ export async function GET(request, { params: paramsPromise }) {
       return new Response("Laporan tidak ditemukan", { status: 404 });
     }
 
-    console.log("PDF DATA:", laporan); // DEBUG
-
     const pdfDoc = await PDFDocument.create();
-    let page = pdfDoc.addPage([600, 800]);
+    let page = pdfDoc.addPage([600, 900]);
     const { width, height } = page.getSize();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    const blueColor = rgb(30 / 255, 64 / 255, 175 / 255);
-    const greenColor = rgb(34 / 255, 139 / 255, 34 / 255);
-    const darkGreen = rgb(0.2, 0.5, 0.2);
+    const blueColor = rgb(0.12, 0.25, 0.69);
+    const greenColor = rgb(0.13, 0.55, 0.13);
 
-    let y = height - 50;
+    let y = height - 70;
 
-    // Judul
-    page.drawText('LAPORAN KONSELING', { x: 50, y, size: 24, font: fontBold, color: blueColor });
-    y -= 50;
-    page.drawLine({ start: { x: 50, y: y + 5 }, end: { x: width - 50, y: y + 5 }, thickness: 2, color: blueColor });
-    y -= 30;
+    page.drawText('LAPORAN KONSELING', { x: 50, y, size: 28, font: fontBold, color: blueColor });
+    y -= 60;
 
-    const drawText = (label, value, isBold = false) => {
-      const text = value ? String(value) : '-';
-      page.drawText(label + ':', { x: 50, y, size: 12, font: isBold ? fontBold : font });
-      page.drawText(text, { x: 120, y, size: 12, font });
-      y -= 25;
+    const drawText = (label, value, bold = false) => {
+      if (y < 100) { page = pdfDoc.addPage([600, 900]); y = height - 70; }
+      page.drawText(`${label}:`, { x: 70, y, size: 12, font: bold ? fontBold : font });
+      page.drawText(value ? String(value) : '-', { x: 160, y, size: 12, font });
+      y -= 28;
     };
 
-    drawText('Tanggal', new Date(laporan.created_at).toLocaleString('id-ID'), true);
-    drawText('Siswa', `${laporan.siswa_name || '-'} (${laporan.nis || '-'})`, true);
+    drawText(
+      'Tanggal',
+      new Date(laporan.created_at).toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }),
+      true
+    );
+
+    drawText('Siswa', `${laporan.siswa_name} (${laporan.nis || 'NIS tidak tersedia'})`, true);
     drawText('Kelas', laporan.kelas || '-', true);
-    drawText('Topik', laporan.topik || '-', true);
-    y -= 10;
 
-    // Isi Laporan
-    page.drawText('Isi Laporan:', { x: 50, y, size: 14, font: fontBold, color: blueColor });
-    y -= 25;
+    // 🔥 TAMPILKAN NAMA GURU BK
+    drawText('Guru BK', laporan.guru_name || 'Tidak diketahui', true);
 
-    const isiLines = splitText(laporan.hasil || 'Tidak ada isi laporan.', 500, font, 12);
+    drawText('Topik Permasalahan', laporan.topik, true);
+
+    y -= 20;
+
+    // Hasil Konseling
+    if (y < 200) { page = pdfDoc.addPage([600, 900]); y = height - 70; }
+    page.drawText('HASIL KONSELING', { x: 70, y, size: 16, font: fontBold, color: blueColor });
+    y -= 35;
+
+    const isiLines = splitText(laporan.hasil || 'Tidak ada catatan hasil konseling.', 480, font, 12);
     for (const line of isiLines) {
-      if (y < 100) {
-        page = pdfDoc.addPage([600, 800]);
-        y = height - 50;
-      }
-      page.drawText(line, { x: 50, y, size: 12, font });
-      y -= 20;
+      if (y < 100) { page = pdfDoc.addPage([600, 900]); y = height - 70; }
+      page.drawText(line, { x: 70, y, size: 12, font, color: rgb(0.1, 0.1, 0.1) });
+      y -= 22;
     }
 
     // Motivasi
     if (laporan.catatan) {
-      y -= 10;
-      if (y < 100) {
-        page = pdfDoc.addPage([600, 800]);
-        y = height - 50;
-      }
-      page.drawText('Motivasi / Solusi:', { x: 50, y, size: 14, font: fontBold, color: greenColor });
-      y -= 25;
+      y -= 20;
+      if (y < 150) { page = pdfDoc.addPage([600, 900]); y = height - 70; }
+      page.drawText('KATA MOTIVASI & SARAN', { x: 70, y, size: 16, font: fontBold, color: greenColor });
+      y -= 35;
 
-      const motivasiLines = splitText(laporan.catatan, 500, font, 12);
-      for (const line of motivasiLines) {
-        if (y < 100) {
-          page = pdfDoc.addPage([600, 800]);
-          y = height - 50;
-        }
-        page.drawText(`"${line}"`, { x: 50, y, size: 12, font, color: darkGreen });
-        y -= 20;
+      const lines = splitText(laporan.catatan, 480, font, 13);
+      for (const line of lines) {
+        if (y < 100) { page = pdfDoc.addPage([600, 900]); y = height - 70; }
+        page.drawText(`"${line}"`, { x: 70, y, size: 13, font: fontBold, color: rgb(0, 0.4, 0) });
+        y -= 28;
       }
     }
 
     // Footer
-    page.drawText('— BLing: Bimbingan Konseling Digital —', {
-      x: 50, y: 50, size: 10, font, color: rgb(0.5, 0.5, 0.5)
+    page.drawText('BLing — Bimbingan Konseling Digital', {
+      x: 70,
+      y: 60,
+      size: 10,
+      font,
+      color: rgb(0.5, 0.5, 0.5)
+    });
+    page.drawText('Dibuat dengan cinta untuk siswa terbaik', {
+      x: 70,
+      y: 45,
+      size: 9,
+      font,
+      color: rgb(0.6, 0.6, 0.6)
     });
 
     const pdfBytes = await pdfDoc.save();
 
     return new NextResponse(pdfBytes, {
+      status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="laporan_konseling_${id}.pdf"`,
+        'Content-Disposition': `inline; filename="Laporan_Konseling_${laporan.siswa_name.replace(/\s+/g, '_')}_${id}.pdf"`,
+        'Cache-Control': 'no-cache',
       },
     });
 
   } catch (error) {
     console.error("Error generating PDF:", error);
-    return new Response("Error: " + error.message, { status: 500 });
+    return new Response("Terjadi kesalahan saat membuat PDF", { status: 500 });
   }
 }

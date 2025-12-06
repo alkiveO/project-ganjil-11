@@ -1,7 +1,7 @@
-// src/components/LaporanModal.jsx
+// src/components/LaporanModal.jsx — VERSI BIRU PREMIUM & SUPER JELAS!
 'use client';
 import { useState } from 'react';
-import GeneratePDFButton from './GeneratePDFButton';
+import { X, FileText, Sparkles } from 'lucide-react';
 
 export default function LaporanModal({ pengajuan, guruId }) {
   const [open, setOpen] = useState(false);
@@ -9,149 +9,158 @@ export default function LaporanModal({ pengajuan, guruId }) {
   const [motivasi, setMotivasi] = useState('');
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
-  const [laporanId, setLaporanId] = useState(null);
 
   const handleSubmit = async () => {
+    if (!isi.trim()) return;
+
     setLoading(true);
     setMsg('');
 
-    const res = await fetch('/api/laporan', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        pengajuan_id: pengajuan.id,
-        isi_laporan: isi,
-        motivasi
-      })
-    });
+    try {
+      const res = await fetch('/api/laporan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pengajuan_id: pengajuan.id,
+          isi_laporan: isi,
+          motivasi: motivasi || null
+        })
+      });
 
-    const data = await res.json();
-    setLoading(false);
+      const data = await res.json();
 
-    if (res.ok) {
-      setMsg('Laporan berhasil disimpan!');
-      setLaporanId(data.laporan_id);
-      setTimeout(() => {
-        fetch('/api/pengajuan/status', {
+      if (res.ok) {
+        setMsg('Laporan berhasil disimpan!');
+
+        await fetch('/api/pengajuan/status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pengajuan_id: pengajuan.id, status: 'selesai' })
+          body: JSON.stringify({
+            pengajuan_id: pengajuan.id,
+            status: 'selesai'
+          })
         });
-        window.location.reload();
-      }, 1500);
-    } else {
-      setMsg(data.error || 'Gagal simpan laporan');
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 1200);
+      } else {
+        setMsg(data.error || 'Gagal menyimpan laporan');
+      }
+    } catch (err) {
+      setMsg('Terjadi kesalahan jaringan');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <>
-      {/* TOMBOL BUKA MODAL */}
+      {/* Tombol Trigger — Sekarang biru cantik */}
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-xl font-medium text-sm shadow-md hover:shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform hover:scale-105"
+        className="inline-flex items-center gap-2.5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-indigo-800 transition-all duration-300 hover:scale-105"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6-4h6m-6 8h6m-9-8a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
+        <FileText className="w-4.5 h-4.5" />
         Isi Laporan
       </button>
 
-      {/* MODAL BACKDROP */}
+      {/* Modal Biru Premium */}
       {open && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-slideUp">
-            {/* HEADER */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-2xl">
-              <h3 className="text-xl font-bold">Laporan Konseling</h3>
-              <p className="text-blue-100 text-sm mt-1">Sesi dengan <span className="font-medium">{pengajuan.siswa_name}</span></p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto animate-in zoom-in-95 duration-300">
+            {/* Header Biru Gradient */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-t-3xl relative">
+              <button
+                onClick={() => setOpen(false)}
+                className="absolute top-5 right-5 p-2 bg-white/20 rounded-full hover:bg-white/30 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-white/20 rounded-2xl">
+                  <FileText className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold">Laporan Konseling</h3>
+                  <p className="text-blue-100 text-sm mt-1">
+                    Siswa: <span className="font-bold text-lg">{pengajuan.siswa_name}</span>
+                  </p>
+                </div>
+              </div>
             </div>
 
-            {/* BODY */}
-            <div className="p-6 space-y-5">
-              {/* PESAN STATUS */}
+            {/* Body */}
+            <div className="p-7 space-y-6">
+              {/* Status Message */}
               {msg && (
-                <div className={`p-4 rounded-xl text-sm font-medium shadow-sm transition-all ${
+                <div className={`p-4 rounded-2xl font-bold text-sm border-2 flex items-center gap-3 ${
                   msg.includes('berhasil')
-                    ? 'bg-green-50 text-green-700 border border-green-200'
-                    : 'bg-red-50 text-red-700 border border-red-200'
+                    ? 'bg-blue-50 text-blue-800 border-blue-300'
+                    : 'bg-red-50 text-red-800 border-red-300'
                 }`}>
-                  <div className="flex items-center gap-2">
-                    {msg.includes('berhasil') ? (
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                    {msg}
-                  </div>
+                  {msg.includes('berhasil') ? (
+                    <Sparkles className="w-5 h-5 text-blue-600" />
+                  ) : (
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                  {msg}
                 </div>
               )}
 
-              {/* TEXTAREA: ISI LAPORAN */}
+              {/* Hasil Konseling */}
               <div>
-                <label className="block text-sm font-semibold text-blue-700 mb-2">
-                  Isi Laporan Konseling <span className="text-red-500">*</span>
+                <label className="block text-sm font-bold text-blue-900 mb-3">
+                  Hasil Konseling <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  placeholder="Tuliskan hasil konseling, observasi, dan rekomendasi..."
                   value={isi}
                   onChange={(e) => setIsi(e.target.value)}
-                  className="w-full p-4 border border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all resize-none h-36 text-blue-900 placeholder-blue-400"
+                  placeholder="Tuliskan observasi, kesimpulan, dan rekomendasi secara lengkap..."
+                  className="w-full p-5 border-2 border-gray-300 rounded-2xl focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition-all resize-none text-gray-900 placeholder-gray-500 font-medium leading-relaxed"
+                  rows={7}
                   required
                 />
               </div>
 
-              {/* TEXTAREA: MOTIVASI */}
+              {/* Kata Motivasi */}
               <div>
-                <label className="block text-sm font-semibold text-blue-700 mb-2">
-                  Kata Motivasi / Solusi
+                <label className="block text-sm font-bold text-blue-900 mb-3">
+                  Kata Motivasi / Saran untuk Siswa
                 </label>
                 <textarea
-                  placeholder="Berikan semangat atau saran tindak lanjut..."
                   value={motivasi}
                   onChange={(e) => setMotivasi(e.target.value)}
-                  className="w-full p-4 border border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all resize-none h-28 text-blue-900 placeholder-blue-400"
+                  placeholder="Contoh: 'Kamu sudah berani membuka diri, itu langkah besar! Terus semangat ya!'"
+                  className="w-full p-5 border-2 border-gray-300 rounded-2xl focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition-all resize-none text-gray-900 placeholder-gray-500 font-medium leading-relaxed"
+                  rows={5}
                 />
               </div>
 
-              {/* TOMBOL AKSI */}
-              <div className="flex gap-3 pt-4">
+              {/* Tombol Aksi */}
+              <div className="flex gap-4 pt-4">
                 <button
                   onClick={handleSubmit}
                   disabled={loading || !isi.trim()}
-                  className="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-xl font-semibold shadow-md hover:shadow-lg hover:from-green-700 hover:to-green-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3 hover:scale-105 active:scale-95"
                 >
                   {loading ? (
-                    <>
-                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Menyimpan...
-                    </>
+                    <>Menyimpan Laporan...</>
                   ) : (
                     <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      Simpan & Selesaikan
+                      <Sparkles className="w-5 h-5" />
+                      Simpan & Selesaikan Konseling
                     </>
                   )}
                 </button>
 
-                {laporanId && (
-                  <GeneratePDFButton laporanId={laporanId} />
-                )}
-
                 <button
                   onClick={() => setOpen(false)}
-                  className="flex-1 bg-gradient-to-r from-gray-300 to-gray-400 text-gray-700 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg hover:from-gray-400 hover:to-gray-500 transition-all duration-200"
+                  className="px-8 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold hover:bg-gray-200 transition"
                 >
-                  Tutup
+                  Batal
                 </button>
               </div>
             </div>

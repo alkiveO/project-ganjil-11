@@ -61,13 +61,13 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/dashboard/siswa"
+              href="/register"
               className="px-8 py-4 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition text-lg font-semibold shadow-lg"
             >
               Siswa: Ajukan Konseling
             </Link>
             <Link
-              href="/dashboard/guru"
+              href="/login "
               className="px-8 py-4 bg-white text-blue-600 border-2 border-blue-600 rounded-full hover:bg-blue-50 transition text-lg font-semibold shadow-lg"
             >
               Guru: Kelola Pengajuan
@@ -173,64 +173,6 @@ export default function Home() {
               <h3 className="text-xl font-semibold text-blue-700 mb-3">Konseling Belajar</h3>
               <p className="text-blue-600">
                 Tingkatkan motivasi, teknik belajar, dan prestasi.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* TESTIMONI SECTION */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-4xl font-bold text-center text-blue-700 mb-16">
-            Apa Kata Mereka?
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* TESTIMONI 1 */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition">
-              <div className="flex items-center mb-5">
-                <div className="w-14 h-14 bg-blue-200 rounded-full flex items-center justify-center text-blue-700 font-bold text-xl">
-                  K
-                </div>
-                <div className="ml-4">
-                  <h4 className="font-semibold text-gray-800">Kaysha Salsabila</h4>
-                  <p className="text-sm text-blue-600">XI BRF 2</p>
-                </div>
-              </div>
-              <p className="text-gray-600 italic">
-                "Dengan BLing, saya bisa langsung ajukan konseling tanpa antri. Guru juga cepat respon!"
-              </p>
-            </div>
-
-            {/* TESTIMONI 2 */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition">
-              <div className="flex items-center mb-5">
-                <div className="w-14 h-14 bg-blue-200 rounded-full flex items-center justify-center text-blue-700 font-bold text-xl">
-                  V
-                </div>
-                <div className="ml-4">
-                  <h4 className="font-semibold text-gray-800">Gianna Vella</h4>
-                  <p className="text-sm text-blue-600">XI BRF 2</p>
-                </div>
-              </div>
-              <p className="text-gray-600 italic">
-                "Jadwal konseling jadi lebih fleksibel. Saya bisa pilih waktu yang pas buat saya."
-              </p>
-            </div>
-
-            {/* TESTIMONI 3 */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition">
-              <div className="flex items-center mb-5">
-                <div className="w-14 h-14 bg-blue-200 rounded-full flex items-center justify-center text-blue-700 font-bold text-xl">
-                  J
-                </div>
-                <div className="ml-4">
-                  <h4 className="font-semibold text-gray-800">Joana Hyunika</h4>
-                  <p className="text-sm text-blue-600">XI BRF 3</p>
-                </div>
-              </div>
-              <p className="text-gray-600 italic">
-                "Laporan PDF-nya rapi banget. Bisa buat bukti kalau saya sudah ikut konseling."
               </p>
             </div>
           </div>

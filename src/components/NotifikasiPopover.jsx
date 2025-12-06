@@ -2,9 +2,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation'; // TAMBAH INI DOANG
 import { Bell, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 
 export default function NotifikasiPopover({ initialNotifs = [], unreadCount = 0 }) {
+  const router = useRouter(); // TAMBAH INI DOANG
   const [open, setOpen] = useState(false);
   const [notifs, setNotifs] = useState(initialNotifs);
   const [loading, setLoading] = useState(false);
@@ -14,12 +16,14 @@ export default function NotifikasiPopover({ initialNotifs = [], unreadCount = 0 
     try {
       await fetch('/api/notifikasi/read', { method: 'POST' });
       setNotifs(notifs.map(n => ({ ...n, is_read: true })));
+      router.refresh(); // INI AJA YANG DITAMBAH — LANGSUNG REFRESH DASHBOARD!
     } catch (error) {
       console.error("Gagal tandai dibaca:", error);
     }
     setLoading(false);
   };
 
+  // SEMUA DI BAWAH INI 10000% SAMA PERSIS, GAK DIUBAH SAMA SEKALI
   const formatTime = (date) => {
     const now = new Date();
     const diff = now - new Date(date);
